@@ -50,6 +50,22 @@ const JUNO: Config = {
 };
 
 // @ts-ignore
+const KOPI: Config = {
+    sender: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+    endpoint: 'https://rest.test.kopi.money',
+    chainId: 'kopi-test-3',
+    hdPath: "m/44'/118/0'/0/0",
+    chainName: 'kopi testnet',
+    params: JSON.stringify({
+        proposal_id: '1',
+        validator_address: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+        chain_name: 'kopi-test-3',
+        contract: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+        fees: { amount: '2000', denom: '' },
+    }),
+};
+
+// @ts-ignore
 const NEUTRON: Config = {
     sender: 'neutron1m8mma95ta2zajqtmfp5c5y3wgeyqzcrc64e4gx',
     endpoint: 'https://neutron-api.polkachu.com',
@@ -95,7 +111,7 @@ const btc: Config = {
     }),
 };
 
-const conf = ref(JUNO);
+const conf = ref(KOPI);
 
 const types = [
     'send',

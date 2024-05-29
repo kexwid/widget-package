@@ -1,25 +1,24 @@
 <script lang="ts" setup>
-import { PropType, computed, onMounted, ref } from 'vue';
-import {
-    getStakingParam,
-} from '../../../utils/http';
-import { Coin, CoinMetadata } from '../../../utils/type';
+import { PropType, computed, ref } from 'vue';
 import { TokenUnitConverter } from '../../../utils/TokenUnitConverter';
+import { Coin, CoinMetadata } from '../../../utils/type';
+
 const props = defineProps({
     endpoint: { type: String, required: true },
     sender: { type: String, required: true },
     balances: Object as PropType<Coin[]>,
     metadata: Object as PropType<Record<string, CoinMetadata>>,
+    kmetadata: [] as any,
     params: String,
 });
 
 const amount = ref('');
 const recipient = ref('');
 const denom = ref('');
-const amountDenom = ref('')
+const amountDenom = ref('');
 
 const msgs = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
+    const convert = new TokenUnitConverter(props.metadata);
     return [
         {
             typeUrl: '/cosmos.bank.v1beta1.MsgSend',
@@ -27,10 +26,11 @@ const msgs = computed(() => {
                 fromAddress: props.sender,
                 toAddress: recipient.value,
                 amount: [
-                    convert.displayToBase(denom.value, {
-                        amount: String(amount.value),
-                        denom: amountDenom.value
-                    })
+                    convert.baseKUnits(
+                        denom.value,
+                        amount.value,
+                        props.kmetadata
+                    ),
                 ],
             },
         },
@@ -38,64 +38,75 @@ const msgs = computed(() => {
 });
 
 const available = computed(() => {
-    const base  = (
-        props.balances?.find((x) => x.denom === denom.value) || {
-            amount: '0',
-            denom: '-',
-        }
-    )
-    const convert = new TokenUnitConverter(props.metadata)
+    const unit = props?.kmetadata?.filter(
+        (u: any) => u.short_name == denom.value
+    )[0];
+
+    const base = props.balances?.find((x) => x.denom === unit?.unit_name) || {
+        amount: '0',
+        denom: '-',
+    };
+    const convert = new TokenUnitConverter(props.metadata);
+
+    if (!props?.kmetadata?.length) {
+        return {
+            base,
+            display: convert.baseToUnit(base, amountDenom.value),
+        };
+    }
     return {
-        base,
-        display: convert.baseToUnit(base, amountDenom.value)
+        denom,
+        display: convert.displayKUnits(base, props.kmetadata),
     };
 });
 
 const showBalances = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
-    return props.balances?.map(b => ({
-        base: b,
-        display: convert.baseToDisplay(b)
-    })) || []
-})
+    const convert = new TokenUnitConverter(props.metadata);
+
+    return (
+        props.balances?.map((b) => ({
+            base: convert.displayKUnits(b, props.kmetadata),
+            display: convert.displayKUnits(b, props.kmetadata),
+        })) || []
+    );
+});
 
 const units = computed(() => {
-    if(!props.metadata || !props.metadata[denom.value]) {
-        amountDenom.value = denom.value
-        return [{denom: denom.value, exponent: 0, aliases: []}]
+    if (!props.metadata || !props.metadata[denom.value]) {
+        amountDenom.value = denom.value;
+        return [{ denom: denom.value, exponent: 0, aliases: [] }];
     }
-    const list = props.metadata[denom.value].denom_units.sort((a, b) => b.exponent - a.exponent)
-    if(list.length > 0) amountDenom.value = list[0].denom
-    return list
-})
+    const list = props.metadata[denom.value].denom_units.sort(
+        (a, b) => b.exponent - a.exponent
+    );
+    if (list.length > 0) amountDenom.value = list[0].denom;
+    return list;
+});
 
 const isValid = computed(() => {
-    let ok = true
-    let error = ""
-    if(!recipient.value) {
-        ok = false
-        error = "Recipient is empty"
+    let ok = true;
+    let error = '';
+    if (!recipient.value) {
+        ok = false;
+        error = 'Recipient is empty';
     }
-    if(!(Number(amount.value) > 0)) {
-        ok = false
-        error = "Amount should be great than 0"
+    if (!(Number(amount.value) > 0)) {
+        ok = false;
+        error = 'Amount should be great than 0';
     }
-    return { ok, error }
-})
-
+    return { ok, error };
+});
 
 function initial() {
+    // @ts-ignore
     denom.value = props.params?.fees?.denom || '';
-    // getStakingParam(props.endpoint).then((x) => {
-    //     denom.value = x.params?.bond_denom;
-    // });
 }
 
 function formatDenom(v: any) {
-    return String(v).substring(0, 10)
+    return String(v).substring(0, 10);
 }
 
-defineExpose({msgs, isValid, initial})
+defineExpose({ msgs, isValid, initial });
 </script>
 <template>
     <div class="dark:text-gray-400">
@@ -103,15 +114,25 @@ defineExpose({msgs, isValid, initial})
             <label class="label">
                 <span class="label-text">Sender</span>
             </label>
-            <input :value="sender" type="text" class="text-gray-600 dark:text-white input border !border-gray-300 dark:!border-gray-600" />
+            <input
+                :value="sender"
+                type="text"
+                class="text-gray-600 dark:text-white input border !border-gray-300 dark:!border-gray-600"
+            />
         </div>
         <div class="form-control">
             <label class="label">
                 <span class="label-text">Balances</span>
             </label>
-            <select v-model="denom" class="select select-bordered dark:text-white">
+            <select
+                v-model="denom"
+                class="select select-bordered dark:text-white"
+            >
                 <option value="">Select a token</option>
-                <option v-for="{base, display} in showBalances" :value="base.denom">
+                <option
+                    v-for="{ base, display } in showBalances"
+                    :value="base.denom"
+                >
                     {{ display.amount }} {{ display.denom }}
                 </option>
             </select>
@@ -129,12 +150,25 @@ defineExpose({msgs, isValid, initial})
         <div class="form-control">
             <label class="label">
                 <span class="label-text">Amount</span>
-                <span>{{ available.display.amount }} {{ formatDenom(available.display.denom) }}</span>
+                <span>
+                    {{ available.display.amount }}
+                    {{ formatDenom(available.display.denom) }}</span
+                >
             </label>
             <label class="input-group">
-                <input v-model="amount" type="number" :placeholder="`Available: ${available?.display.amount}`" class="input border border-gray-300 dark:border-gray-600 w-full dark:text-white" />
-                <select v-model="amountDenom" class="select select-bordered dark:text-white">
-                    <option v-for="u in units" :value="u.denom">{{ formatDenom(u.denom) }}</option>
+                <input
+                    v-model="amount"
+                    type="number"
+                    :placeholder="`Available: ${available?.display.amount}`"
+                    class="input border border-gray-300 dark:border-gray-600 w-full dark:text-white"
+                />
+                <select
+                    v-model="amountDenom"
+                    class="select select-bordered dark:text-white"
+                >
+                    <option v-for="u in units" :value="u.denom">
+                        {{ formatDenom(u.denom) }}
+                    </option>
                 </select>
             </label>
         </div>

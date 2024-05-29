@@ -7,6 +7,7 @@ import {
     getBalance,
     getBalanceMetadata,
     getIBCDenomMetadata,
+    getKDenoms,
     getLatestBlock,
     getStakingParam,
     getTxByHash,
@@ -110,6 +111,7 @@ const memo = ref('');
 const chainId = ref('cosmoshub-4');
 // const chainId = ref('taproot-1');
 const broadcast = ref(BroadcastMode.SYNC);
+const kMetadata = ref([]);
 
 async function initData() {
     if (open.value && props.endpoint && props.sender) {
@@ -121,6 +123,7 @@ async function initData() {
         feeDenom.value = balance.value[0]?.denom;
 
         try {
+            getKDenoms().then((res) => (kMetadata.value = res));
             getBalance(props.endpoint, props.sender).then((x) => {
                 balance.value = x.balances;
                 x.balances?.forEach((coin) => {
@@ -340,8 +343,7 @@ function fetchTx(tx: string) {
                     >✕</label
                 >
                 <h3 class="text-lg font-bold capitalize dark:text-gray-300">
-                    {{ val }}
-                    <!-- {{ showTitle() }} -->
+                    {{ showTitle() }}
                 </h3>
 
                 <div v-if="!sender" class="text-center h-16 items-center">
@@ -358,6 +360,7 @@ function fetchTx(tx: string) {
                             :balances="balance"
                             :metadata="metadatas"
                             :params="props.params"
+                            :kmetadata="kMetadata"
                             @get-validator="setValidatorName"
                         />
                         <form class="space-y-6" action="#" method="POST">
