@@ -19,5 +19,5 @@ registry('explorer-connect-wallet', ConnectWallet);
 registry('explorer-token-convert', TokenConvert);
 
 export default {
-    version: '0.0.1',
+    version: '0.1.1',
 };
