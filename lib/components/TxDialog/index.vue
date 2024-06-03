@@ -300,9 +300,9 @@ function fetchTx(tx: string) {
             if (res.tx_response.code > 0) {
                 error.value = res.tx_response.raw_log;
             } else {
-                if (showTitle() == 'vote') {
+                if (showTitle() == 'Vote') {
                     msg.value = `Your vote has been successfully cast.`;
-                } else if (showTitle() == 'delegate') {
+                } else if (showTitle() == 'Delegate') {
                     msg.value = `Successfully staked to ${val.value} `;
                 } else {
                     msg.value = `Congratulations! ${showTitle()} completed successfully.`;

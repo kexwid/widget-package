@@ -65,7 +65,6 @@ export async function getKDenoms() {
     const url = `https://api.test.kopi.money/denoms`;
     try {
         const res = await get(url);
-        console.log(res, 'res denoms');
         return res;
     } catch (err: any) {
         throw new Error(err);
