@@ -14,6 +14,7 @@ const props = defineProps({
     sender: { type: String, required: true },
     balances: Object as PropType<Coin[]>,
     metadata: Object as PropType<Record<string, CoinMetadata>>,
+    kmetadata: [] as any,
     selectedvalidator: Object as any,
     params: String,
 });
@@ -29,20 +30,23 @@ const stakingDenom = ref('');
 const unbondingTime = ref('');
 const amount = ref('');
 const amountDenom = ref('');
-
+const denom = ref('');
 const emit = defineEmits(['get-validator']);
+
 const msgs = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);
+
     return [
         {
             typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
             value: {
                 delegatorAddress: props.sender,
                 validatorAddress: validator.value.operator_address,
-                amount: convert.displayToBase(stakingDenom.value, {
-                    amount: String(amount.value),
-                    denom: amountDenom.value,
-                }),
+                amount: convert.baseKUnits(
+                    denom.value,
+                    amount.value,
+                    props.kmetadata
+                ),
             },
         },
     ];
@@ -60,13 +64,25 @@ const list: ComputedRef<
 });
 
 const available = computed(() => {
+    const unit = props?.kmetadata?.filter(
+        (u: any) => u.unit_name == stakingDenom.value
+    )[0];
+
     const convert = new TokenUnitConverter(props.metadata);
-    const base = props.balances?.find(
-        (x) => x.denom === stakingDenom.value
-    ) || { amount: '0', denom: stakingDenom.value };
+    const base = props.balances?.find((x) => x.denom === unit?.unit_name) || {
+        amount: '0',
+        denom: stakingDenom.value,
+    };
+
+    if (!props?.kmetadata?.length) {
+        return {
+            base,
+            display: convert.baseToUnit(base, amountDenom.value),
+        };
+    }
     return {
-        base,
-        display: convert.baseToUnit(base, amountDenom.value),
+        denom,
+        display: convert.displayKUnits(base, props.kmetadata),
     };
 });
 
@@ -77,15 +93,27 @@ function loadInactiveValidators() {
 }
 
 const units = computed(() => {
+    const unit = props?.kmetadata?.filter(
+        (u: any) => u.unit_name == stakingDenom.value
+    )[0];
+
     if (!props.metadata || !props.metadata[stakingDenom.value]) {
         amountDenom.value = stakingDenom.value;
-        return [{ denom: stakingDenom.value, exponent: 0, aliases: [] }];
+        denom.value = unit?.short_name;
+        return [
+            {
+                denom: stakingDenom.value,
+                short_name: unit?.short_name,
+                exponent: 0,
+                aliases: [],
+            },
+        ];
     }
     const list = props.metadata[stakingDenom.value].denom_units.sort(
         (a, b) => b.exponent - a.exponent
     );
     if (list.length > 0) amountDenom.value = list[0].denom;
-    return list;
+    return list as any;
 });
 
 const isValid = computed(() => {
@@ -177,10 +205,10 @@ defineExpose({ msgs, isValid, initial });
                     class="input border border-gray-300 dark:border-gray-600 w-full join-item dark:text-white"
                 />
                 <select
-                    v-model="amountDenom"
+                    v-model="denom"
                     class="select select-bordered join-item dark:text-white"
                 >
-                    <option v-for="u in units">{{ u.denom }}</option>
+                    <option v-for="u in units">{{ u.short_name }}</option>
                 </select>
             </label>
         </div>

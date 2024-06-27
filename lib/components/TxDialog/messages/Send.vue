@@ -44,7 +44,7 @@ const available = computed(() => {
 
     const base = props.balances?.find((x) => x.denom === unit?.unit_name) || {
         amount: '0',
-        denom: '-',
+        denom: denom.value,
     };
     const convert = new TokenUnitConverter(props.metadata);
 

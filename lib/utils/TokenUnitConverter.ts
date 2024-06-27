@@ -38,14 +38,13 @@ export class TokenUnitConverter {
 
     baseKUnits(denom: string, amount: string, metadata: KMetadata[]) {
         const unit = metadata.filter((d: any) => denom === d.short_name)[0];
-
         if (Number(amount)) {
             const macro = BigNumber(Number(amount)).times(
                 BigNumber(10).pow(unit.exponent)
             );
 
             return {
-                amount: Number(macro),
+                amount: macro.toFixed(),
                 denom: unit?.unit_name,
             };
         }
