@@ -32,6 +32,7 @@ const amount = ref('');
 const amountDenom = ref('');
 const denom = ref('');
 const emit = defineEmits(['get-validator']);
+const initialSelect = ref('');
 
 const msgs = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);
@@ -112,7 +113,9 @@ const units = computed(() => {
     const list = props.metadata[stakingDenom.value].denom_units.sort(
         (a, b) => b.exponent - a.exponent
     );
-    if (list.length > 0) amountDenom.value = list[0].denom;
+    if (list.length > 0) {
+        amountDenom.value = list[0].denom;
+    }
     return list as any;
 });
 
@@ -137,6 +140,7 @@ const isValid = computed(() => {
 function initial() {
     activeValidators.value = [];
     validator.value.operator_address = params.value.validator_address;
+
     getStakingParam(props.endpoint).then((x) => {
         stakingDenom.value = x.params.bond_denom;
         unbondingTime.value = x.params.unbonding_time;
@@ -145,9 +149,16 @@ function initial() {
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
         if (!params.value.validator_address) {
-            validator.value.operator_address = x.validators.find(
-                (v: any) => v.description.identity === '6783E9F948541962'
-            )?.operator_address;
+            validator.value.operator_address =
+                x.validators[0]?.operator_address;
+            initialSelect.value = x.validators[0];
+        } else {
+            let selectedValidator = x.validators.filter(
+                (v) => v.operator_address == params.value.validator_address
+            )[0];
+            if (selectedValidator) {
+                initialSelect.value = selectedValidator;
+            }
         }
     });
 }
@@ -174,13 +185,11 @@ defineExpose({ msgs, isValid, initial });
                 >
             </label>
             <select
-                v-model="validator"
+                v-model="initialSelect"
                 class="select select-bordered dark:text-white"
                 @change="$emit('get-validator', validator)"
             >
-                <option :value="null" disabled selected>
-                    Select a validator
-                </option>
+                <!-- <option disabled selected>Select a validator</option> -->
                 <option v-for="v in list" :value="v">
                     {{ v.description.moniker }} ({{
                         decimal2percent(v.commission.commission_rates.rate)
