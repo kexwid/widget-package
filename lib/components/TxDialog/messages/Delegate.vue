@@ -139,7 +139,6 @@ const isValid = computed(() => {
 
 function initial() {
     activeValidators.value = [];
-    validator.value.operator_address = params.value.validator_address;
 
     getStakingParam(props.endpoint).then((x) => {
         stakingDenom.value = x.params.bond_denom;
@@ -149,8 +148,7 @@ function initial() {
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
         if (!params.value.validator_address) {
-            validator.value.operator_address =
-                x.validators[0]?.operator_address;
+            validator.value.operator_address = '';
             initialSelect.value = '';
         } else {
             let selectedValidator = x.validators.filter(
@@ -158,6 +156,8 @@ function initial() {
             )[0];
             if (selectedValidator) {
                 initialSelect.value = selectedValidator;
+                validator.value.operator_address =
+                    params.value.validator_address;
             }
         }
     });
