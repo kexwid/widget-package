@@ -157,7 +157,7 @@ function initial() {
                 (v) => v.operator_address == params.value.validator_address
             )[0];
             if (selectedValidator) {
-                initialSelect.value = selectedValidator;
+                initialSelect.value = '';
             }
         }
     });
@@ -189,7 +189,7 @@ defineExpose({ msgs, isValid, initial });
                 class="select select-bordered dark:text-white"
                 @change="$emit('get-validator', validator)"
             >
-                <!-- <option disabled selected>Select a validator</option> -->
+                <option disabled selected value="">Select a validator</option>
                 <option v-for="v in list" :value="v">
                     {{ v.description.moniker }} ({{
                         decimal2percent(v.commission.commission_rates.rate)
