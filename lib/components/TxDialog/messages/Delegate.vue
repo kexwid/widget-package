@@ -151,13 +151,13 @@ function initial() {
         if (!params.value.validator_address) {
             validator.value.operator_address =
                 x.validators[0]?.operator_address;
-            initialSelect.value = x.validators[0];
+            initialSelect.value = '';
         } else {
             let selectedValidator = x.validators.filter(
                 (v) => v.operator_address == params.value.validator_address
             )[0];
             if (selectedValidator) {
-                initialSelect.value = '';
+                initialSelect.value = selectedValidator;
             }
         }
     });
