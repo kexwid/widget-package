@@ -22,6 +22,9 @@ const params = computed(() => JSON.parse(props.params || '{}'));
 
 const validator = ref({
     operator_address: '',
+    description: { moniker: '' },
+    commission: { commission_rates: { rate: '' } },
+    status: '',
 });
 
 const activeValidators = ref([]);
@@ -65,6 +68,8 @@ const list: ComputedRef<
 });
 
 const available = computed(() => {
+    if (!activeValidators.value?.length) initial();
+
     const unit = props?.kmetadata?.filter(
         (u: any) => u.unit_name == stakingDenom.value
     )[0];
@@ -140,6 +145,13 @@ const isValid = computed(() => {
 function initial() {
     activeValidators.value = [];
 
+    validator.value = {
+        operator_address: params.value.validator_address,
+        description: { moniker: '' },
+        commission: { commission_rates: { rate: '' } },
+        status: '',
+    };
+
     getStakingParam(props.endpoint).then((x) => {
         stakingDenom.value = x.params.bond_denom;
         unbondingTime.value = x.params.unbonding_time;
@@ -148,16 +160,26 @@ function initial() {
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
         if (!params.value.validator_address) {
-            validator.value.operator_address = '';
+            validator.value = {
+                operator_address: params.value.validator_address,
+                description: { moniker: '' },
+                commission: { commission_rates: { rate: '' } },
+                status: '',
+            };
             initialSelect.value = '';
         } else {
             let selectedValidator = x.validators.filter(
                 (v) => v.operator_address == params.value.validator_address
             )[0];
             if (selectedValidator) {
-                initialSelect.value = selectedValidator;
-                validator.value.operator_address =
-                    params.value.validator_address;
+                validator.value = selectedValidator;
+            } else {
+                validator.value = {
+                    operator_address: params.value.validator_address,
+                    description: { moniker: '' },
+                    commission: { commission_rates: { rate: '' } },
+                    status: '',
+                };
             }
         }
     });
@@ -185,7 +207,7 @@ defineExpose({ msgs, isValid, initial });
                 >
             </label>
             <select
-                v-model="initialSelect"
+                v-model="validator"
                 class="select select-bordered dark:text-white"
                 @change="$emit('get-validator', validator)"
             >
