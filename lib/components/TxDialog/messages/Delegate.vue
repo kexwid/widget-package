@@ -35,7 +35,6 @@ const amount = ref('');
 const amountDenom = ref('');
 const denom = ref('');
 const emit = defineEmits(['get-validator']);
-const initialSelect = ref('');
 
 const msgs = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);
@@ -159,6 +158,7 @@ function initial() {
 
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
+        console.log(x.validators, 'VALIDATORS');
         if (!params.value.validator_address) {
             validator.value = {
                 operator_address: params.value.validator_address,
@@ -166,10 +166,9 @@ function initial() {
                 commission: { commission_rates: { rate: '' } },
                 status: '',
             };
-            initialSelect.value = '';
         } else {
             let selectedValidator = x.validators.filter(
-                (v) => v.operator_address == params.value.validator_address
+                (v: any) => v.operator_address == params.value.validator_address
             )[0];
             if (selectedValidator) {
                 validator.value = selectedValidator;

@@ -95,7 +95,7 @@ const error = ref('');
 const val = ref({} as any);
 
 const setValidatorName = (v: any) => {
-    val.value = v.description.moniker;
+    val.value = JSON.stringify(v.description.moniker);
 };
 
 // input field

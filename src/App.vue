@@ -58,7 +58,7 @@ const KOPI: Config = {
     chainName: 'kopi testnet',
     params: JSON.stringify({
         proposal_id: '1',
-        validator_address: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+        validator_address: '',
         chain_name: 'kopi-test-3',
         contract: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
         fees: { amount: '2000', denom: '' },
