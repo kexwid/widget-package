@@ -92,7 +92,7 @@ const p = ref({} as { fees: Coin; validator: string });
 const view = ref('input'); // input, submitting
 const open = ref(false);
 const error = ref('');
-const val = ref({} as any);
+const val = ref('');
 
 const setValidatorName = (v: any) => {
     val.value = JSON.stringify(v.description.moniker);

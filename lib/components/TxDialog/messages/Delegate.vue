@@ -158,10 +158,9 @@ function initial() {
 
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
-        console.log(x.validators, 'VALIDATORS');
         if (!params.value.validator_address) {
             validator.value = {
-                operator_address: params.value.validator_address,
+                operator_address: '',
                 description: { moniker: '' },
                 commission: { commission_rates: { rate: '' } },
                 status: '',
@@ -172,9 +171,10 @@ function initial() {
             )[0];
             if (selectedValidator) {
                 validator.value = selectedValidator;
+                emit('get-validator', selectedValidator);
             } else {
                 validator.value = {
-                    operator_address: params.value.validator_address,
+                    operator_address: '',
                     description: { moniker: '' },
                     commission: { commission_rates: { rate: '' } },
                     status: '',
