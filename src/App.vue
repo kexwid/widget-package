@@ -53,13 +53,13 @@ const JUNO: Config = {
 const KOPI: Config = {
     sender: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
     endpoint: 'https://rest.test.kopi.money',
-    chainId: 'kopi-test-3',
+    chainId: 'kopi-test-5',
     hdPath: "m/44'/118/0'/0/0",
     chainName: 'kopi testnet',
     params: JSON.stringify({
         proposal_id: '1',
         validator_address: '',
-        chain_name: 'kopi-test-3',
+        chain_name: 'kopi-test-5',
         contract: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
         fees: { amount: '2000', denom: '' },
     }),
@@ -169,6 +169,7 @@ console.log(ethermintToEth('evmos13zl7c4ea60jt05hxhl2dp443r7zrlz4plc5m8z'));
 
         <div>&nbsp;</div>
         <explorer-connect-wallet
+            :params="conf.params"
             :chain-id="conf.chainId"
             :hd-path="conf.hdPath"
             @change="walletStateChange"
