@@ -27,14 +27,15 @@ const validator = ref({
     status: '',
 });
 
-const activeValidators = ref([]);
-const inactiveValidators = ref([]);
+const activeValidators = ref([] as any);
+const inactiveValidators = ref([] as any);
 const stakingDenom = ref('');
 const unbondingTime = ref('');
 const amount = ref('');
 const amountDenom = ref('');
 const denom = ref('');
 const emit = defineEmits(['get-validator']);
+const showInactiveValidators = ref(false);
 
 const msgs = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);
@@ -93,6 +94,7 @@ const available = computed(() => {
 
 function loadInactiveValidators() {
     getInactiveValidators(props.endpoint).then((x) => {
+        showInactiveValidators.value = true;
         inactiveValidators.value = x.validators;
     });
 }
@@ -141,23 +143,10 @@ const isValid = computed(() => {
     return { ok, error };
 });
 
-function initial() {
-    activeValidators.value = [];
-
-    validator.value = {
-        operator_address: params.value.validator_address,
-        description: { moniker: '' },
-        commission: { commission_rates: { rate: '' } },
-        status: '',
-    };
-
-    getStakingParam(props.endpoint).then((x) => {
-        stakingDenom.value = x.params.bond_denom;
-        unbondingTime.value = x.params.unbonding_time;
-    });
-
+const loadValidators = () => {
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
+        showInactiveValidators.value = false;
         if (!params.value.validator_address) {
             validator.value = {
                 operator_address: '',
@@ -182,6 +171,24 @@ function initial() {
             }
         }
     });
+};
+
+function initial() {
+    activeValidators.value = [];
+
+    validator.value = {
+        operator_address: params.value.validator_address,
+        description: { moniker: '' },
+        commission: { commission_rates: { rate: '' } },
+        status: '',
+    };
+
+    getStakingParam(props.endpoint).then((x) => {
+        stakingDenom.value = x.params.bond_denom;
+        unbondingTime.value = x.params.unbonding_time;
+    });
+
+    loadValidators();
 }
 
 defineExpose({ msgs, isValid, initial });
@@ -199,19 +206,38 @@ defineExpose({ msgs, isValid, initial });
             />
         </div>
         <div class="form-control">
-            <label class="label">
+            <label class="label" v-if="!showInactiveValidators">
                 <span class="label-text">Validator</span>
                 <a class="label-text" @click="loadInactiveValidators()"
                     >Show Inactive</a
                 >
+            </label>
+            <label class="label" v-if="showInactiveValidators">
+                <span class="label-text">Validator</span>
+                <a class="label-text" @click="loadValidators()">Show Active</a>
             </label>
             <select
                 v-model="validator"
                 class="select select-bordered dark:text-white"
                 @change="$emit('get-validator', validator)"
             >
-                <option disabled selected value="">Select a validator</option>
-                <option v-for="v in list" :value="v">
+                <option disabled selected>Select a validator</option>
+                <option
+                    v-if="!showInactiveValidators"
+                    v-for="v in activeValidators"
+                    :value="v"
+                >
+                    {{ v.description.moniker }} ({{
+                        decimal2percent(v.commission.commission_rates.rate)
+                    }}%)
+                    <span v-if="v.status !== 'BOND_STATUS_BONDED'">x</span>
+                </option>
+
+                <option
+                    v-if="showInactiveValidators"
+                    v-for="v in inactiveValidators"
+                    :value="v"
+                >
                     {{ v.description.moniker }} ({{
                         decimal2percent(v.commission.commission_rates.rate)
                     }}%)
