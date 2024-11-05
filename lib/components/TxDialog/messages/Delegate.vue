@@ -95,7 +95,9 @@ const available = computed(() => {
 function loadInactiveValidators() {
     getInactiveValidators(props.endpoint).then((x) => {
         showInactiveValidators.value = true;
-        inactiveValidators.value = x.validators;
+        inactiveValidators.value = x.validators.filter(
+            (v: any) => v.jailed == false
+        );
     });
 }
 
@@ -241,7 +243,6 @@ defineExpose({ msgs, isValid, initial });
                     {{ v.description.moniker }} ({{
                         decimal2percent(v.commission.commission_rates.rate)
                     }}%)
-                    <span v-if="v.status !== 'BOND_STATUS_BONDED'">x</span>
                 </option>
             </select>
         </div>
