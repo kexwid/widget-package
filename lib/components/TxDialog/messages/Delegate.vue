@@ -95,6 +95,12 @@ const available = computed(() => {
 function loadInactiveValidators() {
     getInactiveValidators(props.endpoint).then((x) => {
         showInactiveValidators.value = true;
+        validator.value = {
+            operator_address: params.value.validator_address,
+            description: { moniker: '' },
+            commission: { commission_rates: { rate: '' } },
+            status: '',
+        };
         inactiveValidators.value = x.validators.filter(
             (v: any) => v.jailed == false
         );
