@@ -6,6 +6,7 @@ import {
     getActiveValidators,
     getInactiveValidators,
     getStakingParam,
+    getUnbondingValidators,
 } from '../../../utils/http';
 import { Coin, CoinMetadata } from '../../../utils/type';
 
@@ -14,7 +15,7 @@ const props = defineProps({
     sender: { type: String, required: true },
     balances: Object as PropType<Coin[]>,
     metadata: Object as PropType<Record<string, CoinMetadata>>,
-    kmetadata: [] as any,
+    kmetadata: Array as any,
     selectedvalidator: Object as any,
     params: String,
 });
@@ -29,6 +30,8 @@ const validator = ref({
 
 const activeValidators = ref([] as any);
 const inactiveValidators = ref([] as any);
+const unbondingValidators = ref([] as any);
+const inactiveUnbondingVals = ref([] as any);
 const stakingDenom = ref('');
 const unbondingTime = ref('');
 const amount = ref('');
@@ -92,19 +95,25 @@ const available = computed(() => {
     };
 });
 
-function loadInactiveValidators() {
-    getInactiveValidators(props.endpoint).then((x) => {
-        showInactiveValidators.value = true;
-        validator.value = {
-            operator_address: params.value.validator_address,
-            description: { moniker: '' },
-            commission: { commission_rates: { rate: '' } },
-            status: '',
-        };
+async function loadInactiveValidators() {
+    await getInactiveValidators(props.endpoint).then((x) => {
         inactiveValidators.value = x.validators.filter(
             (v: any) => v.jailed == false
         );
     });
+
+    await getUnbondingValidators(props.endpoint).then((x) => {
+        unbondingValidators.value = x.validators.filter(
+            (v: any) => v.jailed == false
+        );
+    });
+
+    showInactiveValidators.value = true;
+
+    inactiveUnbondingVals.value = [
+        ...inactiveValidators.value,
+        ...unbondingValidators.value,
+    ];
 }
 
 const units = computed(() => {
@@ -243,7 +252,7 @@ defineExpose({ msgs, isValid, initial });
 
                 <option
                     v-if="showInactiveValidators"
-                    v-for="v in inactiveValidators"
+                    v-for="v in inactiveUnbondingVals"
                     :value="v"
                 >
                     {{ v.description.moniker }} ({{

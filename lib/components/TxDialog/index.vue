@@ -111,7 +111,7 @@ const memo = ref('');
 const chainId = ref('cosmoshub-4');
 // const chainId = ref('taproot-1');
 const broadcast = ref(BroadcastMode.SYNC);
-const kMetadata = ref([]);
+const kmetadata = ref([]);
 
 async function initData() {
     if (open.value && props.endpoint && props.sender) {
@@ -123,7 +123,7 @@ async function initData() {
         feeDenom.value = balance.value[0]?.denom;
 
         try {
-            getKDenoms().then((res) => (kMetadata.value = res));
+            getKDenoms().then((res) => (kmetadata.value = res));
             getBalance(props.endpoint, props.sender).then((x) => {
                 balance.value = x.balances;
                 x.balances?.forEach((coin) => {
@@ -359,7 +359,7 @@ function fetchTx(tx: string) {
                             :balances="balance"
                             :metadata="metadatas"
                             :params="props.params"
-                            :kmetadata="kMetadata"
+                            :kmetadata="kmetadata"
                             @get-validator="setValidatorName"
                         />
                         <form class="space-y-6" action="#" method="POST">

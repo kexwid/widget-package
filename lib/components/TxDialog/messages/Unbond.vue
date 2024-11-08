@@ -9,7 +9,7 @@ const props = defineProps({
     sender: { type: String, required: true },
     metadata: Object as PropType<Record<string, CoinMetadata>>,
     params: String,
-    kmetadata: [] as any,
+    kmetadata: Array as any,
 });
 
 const params = computed(() => JSON.parse(props.params || '{}'));
@@ -46,19 +46,6 @@ const msgs = computed(() => {
         },
     ];
 });
-
-// const units = computed(() => {
-//     const denom = delegation.value.balance?.denom;
-//     if (!props.metadata || !props.metadata[denom]) {
-//         amountDenom.value = denom;
-//         return [{ denom: denom, exponent: 0, aliases: [] }];
-//     }
-//     const list = props.metadata[denom].denom_units.sort(
-//         (a, b) => b.exponent - a.exponent
-//     );
-//     if (list.length > 0) amountDenom.value = list[0].denom;
-//     return list;
-// });
 
 const units = computed(() => {
     const delegationDenom = delegation.value.balance?.denom;
@@ -113,15 +100,6 @@ function initial() {
             error.value = err;
         });
 }
-
-// const available = computed(() => {
-//     const convert = new TokenUnitConverter(props.metadata);
-//     const base = delegation.value?.balance || {amount: "", denom: ""}
-//     return {
-//         base,
-//         display: convert.baseToUnit(base, amountDenom.value),
-//     };
-// });
 
 const available = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);

@@ -8,7 +8,7 @@ const props = defineProps({
     sender: { type: String, required: true },
     balances: Object as PropType<Coin[]>,
     metadata: Object as PropType<Record<string, CoinMetadata>>,
-    kmetadata: [] as any,
+    kmetadata: Array as any,
     params: String,
 });
 
