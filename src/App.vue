@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import pingWidget from '../lib/main';
-import { ethToEthermint, ethermintToEth } from '../lib/utils/format';
 
 // const sender = 'evmos13zl7c4ea60jt05hxhl2dp443r7zrlz4plc5m8z';
 // const endpoint = 'https://api-cosmoshub-ia.cosmosia.notional.ventures'// 'https://rest.stargaze-apis.com';
@@ -50,8 +49,8 @@ const JUNO: Config = {
 };
 
 // @ts-ignore
-const KOPI: Config = {
-    sender: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+const KOPI_TEST: Config = {
+    sender: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
     endpoint: 'https://rest.test.kopi.money',
     chainId: 'kopi-test-5',
     hdPath: "m/44'/118/0'/0/0",
@@ -60,8 +59,46 @@ const KOPI: Config = {
         proposal_id: '1',
         validator_address: 'kopivaloper1q95ssdpnefunhdgvrz2xg07fasfdn9ftssnncp',
         chain_name: 'kopi-test-5',
-        contract: 'kopi1dwvrqmn5hzkvgyc5e35et4k4vq33mh2vh7p5re',
+        contract: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
         fees: { amount: '2000', denom: '' },
+    }),
+};
+
+// @ts-ignore
+const KOPI_DEV: Config = {
+    sender: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
+    endpoint: 'https://rest.dev.kopi.money',
+    chainId: 'kopi-dev-1',
+    hdPath: "m/44'/118/0'/0/0",
+    chainName: 'kopi devnet',
+    params: JSON.stringify({
+        proposal_id: '1',
+        validator_address: 'kopivaloper1s6mnxyvy4f0wenyt8njfz5kemf8n762dg39np8',
+        chain_name: 'kopi-dev-1',
+        contract: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
+        fees: { amount: '2000', denom: '' },
+    }),
+};
+
+// @ts-ignore
+const KOPI: Config = {
+    sender: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
+    endpoint: 'https://rest.kopi.money',
+    chainId: 'luwak-1',
+    hdPath: "m/44'/118/0'/0/0",
+    chainName: 'kopi',
+    params: JSON.stringify({
+        proposal_id: '1',
+        validator_address: 'kopivaloper1q95ssdpnefunhdgvrz2xg07fasfdn9ftssnncp',
+        chain_name: 'luwak-1',
+        contract: 'kopi1vx6dhzj23vyserkmgy8dmafclh8ywh7g0js3z5',
+        fees: {
+            denom: 'ukopi',
+            fixed_min_gas_price: 0.0025,
+            low_gas_price: 0.0025,
+            average_gas_price: 0.025,
+            high_gas_price: 0.04,
+        },
     }),
 };
 
@@ -151,12 +188,6 @@ onMounted(() => {
 const walletStateChange = (res: any) => {
     console.log(res, 'resres');
 };
-
-console.log('0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1');
-console.log(
-    ethToEthermint('0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1', 'evmos')
-);
-console.log(ethermintToEth('evmos13zl7c4ea60jt05hxhl2dp443r7zrlz4plc5m8z'));
 </script>
 
 <template>
