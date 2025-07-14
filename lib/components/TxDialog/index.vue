@@ -183,6 +183,14 @@ async function initData() {
         sending.value = false;
     }
 }
+
+// Function to update feeDenom when selection changes
+const updateFeeDenom = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    feeDenom.value = target.value;
+};
+
+
 async function sendTx() {
     try {
         if (!props.sender) throw new Error('Sender should not be empty!');
@@ -378,16 +386,17 @@ function fetchTx(tx: string) {
                                             class="input border border-gray-300 dark:border-gray-600 flex-1 w-0 dark:text-gray-300"
                                         />
                                         <select
-                                            v-model="feeDenom"
-                                            class="select input border border-gray-300 dark:border-gray-600 w-[200px]"
-                                        >
-                                            <option disabled selected>
-                                                Select Fee Token
-                                            </option>
-                                            <option v-for="t in balance">
-                                                {{ t.denom }}
-                                            </option>
-                                        </select>
+    v-model="feeDenom"
+    class="select input border border-gray-300 dark:border-gray-600 w-[200px]"
+    @change="updateFeeDenom"
+>
+    <option disabled value="">
+        Select Fee Token
+    </option>
+    <option v-for="t in balance" :value="t.denom" :key="t.denom">
+        {{ t.denom }}
+    </option>
+</select>
                                     </label>
                                 </div>
                                 <div class="form-control">
